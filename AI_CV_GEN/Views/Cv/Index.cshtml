@@ -1,0 +1,243 @@
+﻿@using CV_Generator.ViewModels
+@model CVFormSubmit
+
+@{
+    ViewData["Title"] = "CV Generator AI";
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/cv-generator.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+}
+
+<!-- HERO -->
+<div class="hero">
+    <h1>Create Your ATS Friendly CV in Seconds</h1>
+    <p class="hero-subtitle">
+        Fill in your details once — AM Tech's AI matches them against any job description
+        and hands you back a clean, recruiter-ready CV.
+    </p>
+</div>
+
+<!-- MAIN CONTAINER -->
+<div class="main-container">
+    <div class="card" id="mainCard">
+
+        <!-- Illustration -->
+        <div class="illustration-wrap">
+            <img src="~/images/cv-illustration.png" alt="CV Generator Illustration" />
+        </div>
+
+        <h2 class="card-title">Create Your CV</h2>
+
+        <form asp-controller="Cv"
+              asp-action="Generate"
+              method="post"
+              id="cvForm"
+              novalidate>
+
+            @Html.AntiForgeryToken()
+
+           
+            <input type="hidden" id="skillsJson" name="SkillsJson" />
+            <input type="hidden" id="experienceJson" name="ExperienceJson" />
+            <input type="hidden" id="projectsJson" name="ProjectsJson" />
+
+            <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+            <div class="section-label">Personal Information</div>
+            <hr class="section-divider" />
+
+            <div class="two-col-grid">
+                <div class="input-group">
+                    <i class="fa-regular fa-user icon"></i>
+                    <input asp-for="Name"
+                           placeholder="e.g. Ahmed Reza"
+                           autocomplete="name" />
+                    <span asp-validation-for="Name" class="field-error"></span>
+                </div>
+                <div class="input-group">
+                    <i class="fa-regular fa-envelope icon"></i>
+                    <input asp-for="Email"
+                           placeholder="e.g. ahmed@example.com"
+                           autocomplete="email" />
+                    <span asp-validation-for="Email" class="field-error"></span>
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-phone icon"></i>
+                    <input asp-for="Phone"
+                           placeholder="e.g. 0123456789"
+                           autocomplete="tel" />
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-location-dot icon"></i>
+                    <input asp-for="Address"
+                           placeholder="e.g. Cairo, Egypt"
+                           autocomplete="street-address" />
+                </div>
+                <div class="input-group">
+                    <i class="fa-brands fa-linkedin icon"></i>
+                    <input asp-for="LinkedIn"
+                           placeholder="e.g. linkedin.com/in/ahmedreza" />
+                </div>
+            </div>
+
+            <div class="section-label">Education</div>
+            <hr class="section-divider" />
+
+            <div class="two-col-grid">
+                <div class="labeled-input">
+                    <span class="label-tag">Degree</span>
+                    <input asp-for="Education.Degree"
+                           placeholder="e.g. BSc Computer Science" />
+                </div>
+                <div class="labeled-input">
+                    <span class="label-tag">University</span>
+                    <input asp-for="Education.University"
+                           placeholder="e.g. Cairo University" />
+                </div>
+                <div class="labeled-input">
+                    <span class="label-tag">College</span>
+                    <input asp-for="Education.College"
+                           placeholder="e.g. Faculty of Engineering" />
+                </div>
+                <div class="labeled-input">
+                    <span class="label-tag">Grad. Year</span>
+                    <input asp-for="Education.GraduationYear"
+                           placeholder="e.g. 2023" />
+                </div>
+                <div class="labeled-input">
+                    <span class="label-tag">GPA</span>
+                    <input asp-for="Education.GPA"
+                           placeholder="e.g. 3.8 / 4.0" />
+                </div>
+            </div>
+
+            <div class="section-label">Skills</div>
+            <hr class="section-divider" />
+
+            <div class="skill-input-row">
+                <div class="input-group" style="flex:1; margin-bottom:0;">
+                    <i class="fa-solid fa-code icon"></i>
+                    <input type="text"
+                           id="skillInput"
+                           placeholder="Type a skill and press Enter or click Add…" />
+                </div>
+                <button type="button" class="add-btn" onclick="addSkillTag()">
+                    <span class="plus-circle">+</span> Add Skill
+                </button>
+            </div>
+            <div id="skillTagsContainer" class="skill-tags-container"></div>
+
+            <div class="main-grid" style="margin-top: 0;">
+
+                <div>
+                    <div class="section-label">Experience</div>
+                    <hr class="section-divider" />
+
+                    <div class="entries-list" id="experienceList"></div>
+
+                    <div class="btn-row">
+                        <button type="button" class="add-btn" onclick="addExperience()">
+                            <span class="plus-circle">+</span> Add Experience
+                        </button>
+                        <button type="button" class="delete-btn" id="deleteExpBtn"
+                                onclick="deleteLastExperience()" disabled>
+                            <i class="fa-solid fa-trash-can"></i> Delete Last
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="section-label">Projects</div>
+                    <hr class="section-divider" />
+
+                    <div class="entries-list" id="projectList"></div>
+
+                    <div class="btn-row">
+                        <button type="button" class="add-btn" onclick="addProject()">
+                            <span class="plus-circle">+</span> Add Project
+                        </button>
+                        <button type="button" class="delete-btn" id="deleteProjBtn"
+                                onclick="deleteLastProject()" disabled>
+                            <i class="fa-solid fa-trash-can"></i> Delete Last
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="section-label" style="margin-top:28px;">Job Description (ATS Matching)</div>
+            <hr class="section-divider" />
+            <div class="job-desc-wrap">
+                <textarea asp-for="DescriptionForATS"
+                          placeholder="Paste the job description here for ATS keyword matching…"></textarea>
+            </div>
+
+            <div style="display:flex; justify-content:center;">
+                <button type="submit"
+                        class="generate-btn"
+                        id="generateBtn"
+                        onclick="prepareSubmit()">
+                    <span class="spark">✨</span> Generate AI CV
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+    <p class="powered-by">Powered by <span>AM Tech</span> — Building Smart Digital Solutions</p>
+</div>
+
+@if (!string.IsNullOrEmpty(Model?.GeneratedCV))
+{
+    <div class="modal-overlay active" id="resultModal">
+        <div class="modal">
+            <h2>
+                <i class="fa-solid fa-file-lines" style="color:var(--gold-dark); margin-right:8px;"></i>
+                Your AI-Generated CV
+            </h2>
+            <div class="cv-preview" id="cvPreview">@Model.GeneratedCV</div>
+            <div class="modal-actions">
+                <button class="modal-btn primary" onclick="downloadCV()">
+                    <i class="fa-solid fa-download"></i> Download .txt
+                </button>
+                <button class="modal-btn primary" onclick="copyCV()">
+                    <i class="fa-regular fa-copy"></i> Copy to Clipboard
+                </button>
+                <button class="modal-btn secondary" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="modal-overlay" id="resultModal">
+        <div class="modal">
+            <h2>
+                <i class="fa-solid fa-file-lines" style="color:var(--gold-dark); margin-right:8px;"></i>
+                Your AI-Generated CV
+            </h2>
+            <div class="cv-preview" id="cvPreview"></div>
+            <div class="modal-actions">
+                <button class="modal-btn primary" onclick="downloadCV()">
+                    <i class="fa-solid fa-download"></i> Download .txt
+                </button>
+                <button class="modal-btn primary" onclick="copyCV()">
+                    <i class="fa-regular fa-copy"></i> Copy to Clipboard
+                </button>
+                <button class="modal-btn secondary" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/cv-generator.js" asp-append-version="true"></script>
+}

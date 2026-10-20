@@ -1,0 +1,562 @@
+﻿@model CV_Generator.ViewModels.AiCvResult
+
+@{
+    var cv = Model.OptimizedCV;
+    ViewData["Title"] = "Your CV";
+}
+
+<style>
+    .builder-shell {
+        max-width: 1100px;
+        margin: 32px auto;
+        padding: 0 18px;
+    }
+
+    /* =========================
+           ACTIONS
+           ========================= */
+
+    .builder-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-bottom: 20px;
+    }
+
+        .builder-actions button,
+        .builder-actions a {
+            border: 0;
+            border-radius: 8px;
+            padding: 11px 16px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+    .print-btn {
+        background: #1d4ed8;
+        color: #fff;
+    }
+
+    .back-btn {
+        background: #e5e7eb;
+        color: #172033;
+    }
+
+    /* =========================
+           CV PAPER
+           ========================= */
+
+    .cv-paper {
+        background: #fff;
+        max-width: 850px;
+        margin: auto;
+        padding: 54px 62px;
+        box-shadow: 0 12px 45px #1720331c;
+        color: #172033;
+    }
+
+    /* =========================
+           HEADER
+           ========================= */
+
+    .cv-header {
+        border-bottom: 3px solid #1d4ed8;
+        padding-bottom: 22px;
+        margin-bottom: 26px;
+    }
+
+        .cv-header h1 {
+            margin: 0 0 10px;
+            font-size: 2.25rem;
+            letter-spacing: -.04em;
+            color: #123b9c;
+        }
+
+    .contact {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 18px;
+        color: #526174;
+        font-size: .92rem;
+    }
+
+    .contact-item {
+        word-break: break-word;
+    }
+
+    /* =========================
+           SECTIONS
+           ========================= */
+
+    .cv-section {
+        margin-top: 24px;
+    }
+
+        .cv-section h2 {
+            font-size: .86rem;
+            color: #1d4ed8;
+            border-bottom: 1px solid #dbe3f0;
+            padding-bottom: 7px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: .13em;
+        }
+
+        .cv-section h3 {
+            margin: 15px 0 3px;
+            font-size: 1.03rem;
+        }
+
+        .cv-section p {
+            line-height: 1.55;
+            margin: 7px 0;
+        }
+
+    .meta {
+        color: #64748b;
+        font-size: .9rem;
+    }
+
+    /* =========================
+           LISTS
+           ========================= */
+
+    .cv-list {
+        margin: 8px 0 0 20px;
+        padding: 0;
+    }
+
+        .cv-list li {
+            margin: 5px 0;
+            line-height: 1.45;
+        }
+
+    /* =========================
+           SKILLS
+           ========================= */
+
+    .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+    }
+
+    .chip {
+        background: #eef4ff;
+        border: 1px solid #cbdcff;
+        color: #1745a5;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: .86rem;
+    }
+
+    /* =========================
+           MOBILE
+           ========================= */
+
+    @@media (max-width: 700px) {
+
+        .builder-shell {
+            margin: 20px auto;
+            padding: 0 12px;
+        }
+
+        .cv-paper {
+            padding: 32px 24px;
+        }
+
+        .cv-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .builder-actions {
+            justify-content: stretch;
+        }
+
+            .builder-actions > * {
+                flex: 1;
+                text-align: center;
+            }
+    }
+
+    /* =========================
+           PRINT
+           ========================= */
+
+    @@media print {
+
+        body {
+            background: #fff !important;
+        }
+
+        .builder-actions,
+        header,
+        footer {
+            display: none !important;
+        }
+
+        .builder-shell {
+            margin: 0;
+            padding: 0;
+            max-width: none;
+        }
+
+        .cv-paper {
+            box-shadow: none;
+            max-width: none;
+            width: 100%;
+            padding: 0;
+        }
+
+        .cv-header {
+            border-bottom-color: #000;
+        }
+
+            .cv-header h1,
+            .cv-section h2 {
+                color: #000;
+            }
+
+        .chip {
+            background: transparent;
+            border: 0;
+            padding: 0;
+            border-radius: 0;
+            color: #000;
+        }
+
+        @@page {
+            size: A4;
+            margin: 16mm;
+        }
+    }
+</style>
+
+
+<div class="builder-shell">
+
+    <!-- =========================
+         ACTIONS
+         ========================= -->
+
+    <div class="builder-actions">
+
+        <a class="back-btn"
+           href="@Url.Action("Index", "Cv")">
+            Edit CV
+        </a>
+
+        <button class="print-btn"
+                type="button"
+                onclick="window.print()">
+            Save as PDF
+        </button>
+
+    </div>
+
+
+    <!-- =========================
+         CV
+         ========================= -->
+
+    <article class="cv-paper" id="cvBuilder">
+
+        <!-- =========================
+             HEADER
+             ========================= -->
+
+        <header class="cv-header">
+
+            @if (!string.IsNullOrWhiteSpace(cv.FullName))
+            {
+                <h1>@cv.FullName</h1>
+            }
+
+            <div class="contact">
+
+                @if (!string.IsNullOrWhiteSpace(cv.Contact.Email))
+                {
+                    <span class="contact-item">
+                        @cv.Contact.Email
+                    </span>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(cv.Contact.Phone))
+                {
+                    <span class="contact-item">
+                        @cv.Contact.Phone
+                    </span>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(cv.Contact.Address))
+                {
+                    <span class="contact-item">
+                        @cv.Contact.Address
+                    </span>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(cv.Contact.LinkedIn))
+                {
+                    <span class="contact-item">
+                        @cv.Contact.LinkedIn
+                    </span>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(cv.Contact.GitHub))
+                {
+                    <span class="contact-item">
+                        @cv.Contact.GitHub
+                    </span>
+                }
+
+            </div>
+
+        </header>
+
+
+        <!-- =========================
+             SUMMARY
+             ========================= -->
+        @if (!string.IsNullOrWhiteSpace(cv.Summary))
+        {
+            <section class="cv-section">
+
+                <h2>Professional Summary</h2>
+
+                <p>
+                    @cv.Summary
+                </p>
+
+            </section>
+        }
+
+
+        <!-- =========================
+             SKILLS
+             ========================= -->
+        @if (cv.Skills != null && cv.Skills.Any())
+        {
+            <section class="cv-section">
+
+                <h2>Skills</h2>
+
+                <div class="chips">
+
+                    @foreach (var skill in cv.Skills)
+                    {
+                        if (!string.IsNullOrWhiteSpace(skill))
+                        {
+                            <span class="chip">
+                                @skill
+                            </span>
+                        }
+                    }
+
+                </div>
+
+            </section>
+        }
+
+
+        <!-- =========================
+             EXPERIENCE
+             ========================= -->
+        @if (cv.Experience != null && cv.Experience.Any())
+        {
+            <section class="cv-section">
+
+                <h2>Experience</h2>
+
+                @foreach (var item in cv.Experience)
+                {
+                    <div class="experience-item">
+
+                        @if (!string.IsNullOrWhiteSpace(item.JobTitle))
+                        {
+                            <h3>
+
+                                @item.JobTitle
+
+                                @if (!string.IsNullOrWhiteSpace(item.Company))
+                                {
+                                    <span class="meta">
+                                        · @item.Company
+                                    </span>
+                                }
+
+                            </h3>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(item.Duration))
+                        {
+                            <div class="meta">
+                                @item.Duration
+                            </div>
+                        }
+
+                        @if (item.Responsibilities != null &&
+                             item.Responsibilities.Any())
+                        {
+                            <ul class="cv-list">
+
+                                @foreach (var responsibility in item.Responsibilities)
+                                {
+                                    if (!string.IsNullOrWhiteSpace(responsibility))
+                                    {
+                                        <li>
+                                            @responsibility
+                                        </li>
+                                    }
+                                }
+
+                            </ul>
+                        }
+
+                    </div>
+                }
+
+            </section>
+        }
+
+
+        <!-- =========================
+             PROJECTS
+             ========================= -->
+        @if (cv.Projects != null && cv.Projects.Any())
+        {
+            <section class="cv-section">
+
+                <h2>Projects</h2>
+
+                @foreach (var item in cv.Projects)
+                {
+                    <div class="project-item">
+
+                        @if (!string.IsNullOrWhiteSpace(item.Name))
+                        {
+                            <h3>
+
+                                @item.Name
+
+                                @if (!string.IsNullOrWhiteSpace(item.Date))
+                                {
+                                    <span class="meta">
+                                        · @item.Date
+                                    </span>
+                                }
+
+                            </h3>
+                        }
+
+                        @if (item.Technologies != null &&
+                             item.Technologies.Any())
+                        {
+                            <div class="meta">
+                                @string.Join(" · ", item.Technologies)
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(item.Description))
+                        {
+                            <p>
+                                @item.Description
+
+                                @if (!string.IsNullOrWhiteSpace(item.Url))
+                                {
+                                    <span class="meta">
+                                        (@item.Url)
+                                    </span>
+                                }
+                            </p>
+                        }
+
+                    </div>
+                }
+
+            </section>
+        }
+
+
+        <!-- =========================
+             EDUCATION
+             ========================= -->
+        @if (cv.Education != null && cv.Education.Any())
+        {
+            <section class="cv-section">
+
+                <h2>Education</h2>
+
+                @foreach (var item in cv.Education)
+                {
+                    <div class="education-item">
+
+                        @if (!string.IsNullOrWhiteSpace(item.Degree))
+                        {
+                            <h3>
+                                @item.Degree
+                            </h3>
+                        }
+
+                        @if (!string.IsNullOrWhiteSpace(item.Institution) ||
+                             !string.IsNullOrWhiteSpace(item.Year))
+                        {
+                            <div class="meta">
+
+                                @if (!string.IsNullOrWhiteSpace(item.Institution))
+                                {
+                                    @item.Institution
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(item.Institution) &&
+                                     !string.IsNullOrWhiteSpace(item.Year))
+                                {
+                                    <span> · </span>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(item.Year))
+                                {
+                                    @item.Year
+                                }
+
+                            </div>
+                        }
+
+                    </div>
+                }
+
+            </section>
+        }
+
+
+        <!-- =========================
+             CERTIFICATIONS
+             ========================= -->
+        @if (cv.Certifications != null &&
+                     cv.Certifications.Any())
+        {
+            <section class="cv-section">
+
+                <h2>Certifications</h2>
+
+                <ul class="cv-list">
+
+                    @foreach (var certification in cv.Certifications)
+                    {
+                        if (!string.IsNullOrWhiteSpace(certification))
+                        {
+                            <li>
+                                @certification
+                            </li>
+                        }
+                    }
+
+                </ul>
+
+            </section>
+        }
+
+    </article>
+
+</div>
